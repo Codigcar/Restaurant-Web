@@ -1,3 +1,6 @@
+
+let mealsState =[]
+
 /* funcion para convertir el string a HTML y convertido a HTML se pueda seleccionar 
 ya que todo los elementos html tiene EVENTOS*/
 const stringToHTML = (s) => {
@@ -34,6 +37,10 @@ window.onload = () => {
         e.preventDefault() /* evitar que se refrese la pag al presionar el boton */
         const mealId = document.getElementById('meals-id')
         const mealIdValue =  mealId.value
+        /* mientras cargar el boton deberá estar deshabilitado */
+        const submit = document.getElementById('submit')
+        submit.setAttribute('disabled', true)
+        
         if (!mealIdValue) {
             alert('mealIdValue no existe, debe seleccionar un plato')
             return
@@ -51,9 +58,16 @@ window.onload = () => {
                 'Content-type': 'application/json', /* para que el servidor sepa que se envia un json */
             },
             body: JSON.stringify(order)
-        }).then(
-            x => console.log(x)
-        )
+        }).then(x => /* console.log(x) */ x.json()) /* x.json -> solo traera la informacion de tipo json porque hay varios tipos */
+            .then(respuesta => {
+                /* console.log(respuesta) */
+                const renderedOrder = renderOrder(respuesta, mealsState)
+                const ordersList = document.getElementById('orders-list')
+                ordersList.appendChild(renderedOrder)
+                /* termina de agregar los elementos y el boton se habilita */
+                submit.removeAttribute('disabled')
+
+            })
 
 
 
@@ -62,6 +76,7 @@ window.onload = () => {
     fetch('https://custom-build-topaz.vercel.app/api/meals')
         .then(resp => resp.json())
         .then(data => {
+            mealsState = data
             const mealsList = document.getElementById('meals-list')
             const submit = document.getElementById('submit')
 
